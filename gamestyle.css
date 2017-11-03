@@ -1,0 +1,36 @@
+* {margin: 0; padding: 0; }
+html {overflow-y: scroll; background-color: black;} 
+ul { list-style: none inside; }
+li { list-style: none inside; }
+a:focus { outline: none; }
+.clear { clear: both; }
+a { text-decoration: none; color: black;}
+input, textarea { outline: none; }
+fieldset { border: none; }
+table { border-collapse: collapse; border-spacing: 0; }
+::-moz-selection{ background: pink; color: white; } 
+::selection { background: pink; color: white; }
+#name{ text-align: center; color:#dae262; font-size:60px; height: 15%; margin-bottom: 40px; }
+#HELP{ width:31%; float: left; font-size: 30px; color: yellow; text-align: center; }
+.info{width: 64%; margin-left: 18%; margin-top:9%; background-image:"info.png"}
+
+
+#board { margin-left: 20px; border: 9px solid #c8fcad; margin-top: 7px; margin-bottom: 7px;  
+-moz-box-shadow:    0px 0px 0px 3px #324f5a;
+-webkit-box-shadow: 0px 0px 0px 3px #324f5a;
+box-shadow:         0px 0px 0px 3px #324f5a; }
+#board td { width: 50px; height: 50px; border: 0px solid black; background: rgb(206, 206, 206); }
+#board td.vertWall,
+#board td.vertWall_NOHOVER { width: 11px; border: 0px; background: #c8fcad; }
+#board td.horizWall,
+#board td.horizWall_NOHOVER { height: 11px; border: 0px; background: #c8fcad; }     
+#board td.space { width: 11px; height: 11px; border: 0px; background: #c8fcad; }
+#board td.horizWall, #board td.vertWall { cursor: pointer; }
+#board td.movableYellowSpaces { background: #f3ff6a; }    
+textarea { visibility: hidden; }   
+
+.player1piece { border-radius: 50%; width: 39px; height: 39px; background: #bc2525; margin-left: 5px; border: 1px solid #a31d1d; }
+.player2piece { border-radius: 50%; width: 39px; height: 39px; background: #4b3dcc; margin-left: 5px; border: 1px solid #34a51d; }
+#board td.possibleWall { background: #5f212d; }
+#board td.keepWall { background: #5f212d; }
+
