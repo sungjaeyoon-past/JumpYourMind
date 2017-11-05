@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link type="text/css" rel="stylesheet" href="gamestyle.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <title>Document</title>
+<script>
+$(document).ready(function(){
+    var player1Walls=10;
+    var player2Walls=10;
+    var boardWidth=9;
+    var clickPlayer=1;
+    var TURN=1;//or2
+    $('.info').hide();
+    var boardgame= new Array( 
+    //  0  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],//0
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//1
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//2
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//3
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//4
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//5
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//6
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//7
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//8
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//9
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//10
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//11
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//12
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//13
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//14
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//15
+        [0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],//16
+        [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],//17
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] //18
+    );
+
+    $('.help').live({
+        mouseenter: function () {
+            $('.info').show();         
+        }, mouseleave: function () {
+            $('.info').hide();
+        }});
+
+    //horiz hover
+    $('.horizWall').live({
+        mouseenter: function () {
+            if (player1Walls>0) {
+                $(this).addClass("possibleWall");
+                $(this).next().addClass("possibleWall");
+                $(this).next().next().addClass("possibleWall");
+            }
+        }, mouseleave: function () {
+            $(this).removeClass("possibleWall");  
+            $(this).next().removeClass("possibleWall");  
+            $(this).next().next().removeClass("possibleWall");     
+        }});
+    
+    //vert hover
+    $('.vertWall').live({ 
+        mouseenter: function () {
+            if (player1Walls>0) {
+                var nextVert = $(this).attr('data-name');
+                var nextVertFirst = parseInt(nextVert.substr(0,nextVert.indexOf("-"))) + boardWidth;
+                var nextVertSub = parseInt(nextVert.substr(nextVert.indexOf("-")+1)) + boardWidth;
+                var cross = nextVertFirst-boardWidth+"-"+nextVertFirst; 
+                nextVert = nextVertFirst+"-"+nextVertSub;            
+                $(this).addClass("possibleWall");   
+                $("td[data-name='"+nextVert+"']").addClass("possibleWall"); 
+                $("td[data-name='"+cross+"']").next().addClass("possibleWall");
+            }
+        }, mouseleave: function () { 
+            var nextVert = $(this).attr('data-name');
+            var nextVertFirst = parseInt(nextVert.substr(0,nextVert.indexOf("-"))) + boardWidth;
+            var nextVertSub = parseInt(nextVert.substr(nextVert.indexOf("-")+1)) + boardWidth;
+            var cross = nextVertFirst-boardWidth+"-"+nextVertFirst; 
+            nextVert = nextVertFirst+"-"+nextVertSub;   
+            $(this).removeClass("possibleWall");   
+            $("td[data-name='"+nextVert+"']").removeClass("possibleWall"); 
+            $("td[data-name='"+cross+"']").next().removeClass("possibleWall");    
+        }});
+
+
+    //player move
+    $('.player1piece').live('click',function(){
+        if(TURN==-1){
+            alert("상대방 차례!")
+            return;
+        }
+        var current=$(this).parent().attr('data-name');
+        var now=current;
+        var result=parseInt(current/9);
+        var remain=current-result*9;
+        var arrFirst=result*2+1;
+        var arrSecond=remain*2+1;  //current -> boardgame[arrFirst][arrLast];
+        console.log(boardgame);
+        //yellowspace display
+            //up
+            if(arrFirst!=1){ // 1 row abandon up
+                if(boardgame[arrFirst-1][arrSecond]==1){
+                    var upNumber=parseInt(now)-9;
+                    $("td[data-name='"+upNumber+"']").addClass("movableYellowSpaces"); 
+                }   
+            }
+            //down
+            if(arrFirst!=17){ // 9 row abandon down
+                if(boardgame[arrFirst+1][arrSecond]==1){
+                    var downNumber=parseInt(now)+9;
+                    $("td[data-name='"+downNumber+"']").addClass("movableYellowSpaces"); 
+                } 
+            }
+            //left
+            if(arrSecond!=1){ // 1 col abandon left
+                if(boardgame[arrFirst][arrSecond-1]==1){
+                    var leftNumber=parseInt(now)-1;
+                    $("td[data-name='"+leftNumber+"']").addClass("movableYellowSpaces");
+                }   
+            }
+            //right
+            if(arrSecond!=17){ // 1 col abandon left
+                if(boardgame[arrFirst][arrSecond+1]==1){
+                    var rightNumber=parseInt(now)+1;
+                    $("td[data-name='"+rightNumber+"']").addClass("movableYellowSpaces");
+                }   
+            }
+    });
+
+    //player move
+    $('.player2piece').live('click',function(){
+        if(TURN==1){
+            alert("상대방 차례!")
+            return;
+        }
+        var current=$(this).parent().attr('data-name');
+        var now=current;
+        var result=parseInt(current/9);
+        var remain=current-result*9;
+        var arrFirst=result*2+1;
+        var arrSecond=remain*2+1;  //current -> boardgame[arrFirst][arrLast];
+        console.log(boardgame);
+        //yellowspace display
+        //up
+        if(arrFirst!=1){ // 1 row abandon up
+            if(boardgame[arrFirst-1][arrSecond]==1){
+                var upNumber=parseInt(now)-9;
+                $("td[data-name='"+upNumber+"']").addClass("movableYellowSpaces"); 
+            }   
+        }
+        //down
+        if(arrFirst!=17){ // 9 row abandon down
+            if(boardgame[arrFirst+1][arrSecond]==1){
+                var downNumber=parseInt(now)+9;
+                $("td[data-name='"+downNumber+"']").addClass("movableYellowSpaces"); 
+            } 
+        }
+        //left
+        if(arrSecond!=1){ // 1 col abandon left
+            if(boardgame[arrFirst][arrSecond-1]==1){
+                var leftNumber=parseInt(now)-1;
+                $("td[data-name='"+leftNumber+"']").addClass("movableYellowSpaces");
+            }   
+        }
+        //right
+        if(arrSecond!=17){ // 1 col abandon left
+            if(boardgame[arrFirst][arrSecond+1]==1){
+                var rightNumber=parseInt(now)+1;
+                $("td[data-name='"+rightNumber+"']").addClass("movableYellowSpaces");
+            }   
+        }
+    });
+
+      //yellowspace click and move
+      $('.movableYellowSpaces').live('click',function(){
+        $('tr > td').removeClass('movableYellowSpaces');
+        if(TURN==1){
+            $('tr > td > div').removeClass('player1piece');
+            $(this).children('div').addClass('player1piece');
+        }else{
+            $('tr > td > div').removeClass('player2piece');
+            $(this).children('div').addClass('player2piece');
+        }      
+
+        var player1win = $('.player1piece').parent().attr("data-name");
+        var player2win = $('.player2piece').parent().attr("data-name"); 
+        //alert(player1win);
+        //alert(player2win);
+        if (player2win>=0 && player2win<=8){ 
+            alert("플레이어 2 승리 !!!!!!!!");
+            console.log("game end");
+        } 
+        if (player1win>=72 && player1win<=80) { 
+            alert("플레이어 1 승리 !!!!!!!!");
+            console.log("game end");
+        }   
+        console.log(TURN);
+        TURN=TURN*(-1);
+    });
+
+    //placingwall -> pathfind
+    $('.possibleWall').live('click', function(){ 
+        var vertOrHoriz = $(this).attr('class').substr(0,4);
+        var isAlreadyPossible=$(this).attr('class');
+        var isAlreadyPossibleNext=$(this).next().next().attr('class');
+        var nextVert = $(this).attr('data-name');
+        var nextVertFirst = parseInt(nextVert.substr(0,nextVert.indexOf("-"))) + boardWidth;
+        var nextVertSub = parseInt(nextVert.substr(nextVert.indexOf("-")+1)) + boardWidth;
+        var cross = nextVertFirst-boardWidth+"-"+nextVertFirst; 
+        nextVert = nextVertFirst+"-"+nextVertSub;
+
+        if(isAlreadyPossible=="vertWall keepWall possibleWall"||isAlreadyPossibleNext=="vertWall keepWall possibleWall"||isAlreadyPossible=="horizWall keepWall possibleWall"){
+            alert("둘 수 없는 자리!");
+        }else if(vertOrHoriz!="vert"){
+            $(this).addClass("keepWall");
+            $(this).next().addClass("keepWall"); 
+            $(this).next().next().addClass("keepWall");
+            //edit array
+            var result=parseInt(nextVertFirst/9);
+            var remain=nextVertFirst-result*9;
+            var editBoardFirst=result*2;
+            var editBoardSecond=remain*2+1;
+            boardgame[editBoardFirst][editBoardSecond]=0;
+            boardgame[editBoardFirst][editBoardSecond+2]=0;
+            TURN=TURN*(-1);
+        }else{                                       
+            $(this).addClass("keepWall");   
+            $("td[data-name='"+nextVert+"']").addClass("keepWall"); 
+            $("td[data-name='"+cross+"']").next().addClass("keepWall");
+            //edit array
+            var result=parseInt(nextVertFirst/9);
+            var remain=nextVertFirst-result*9;
+            var editBoardFirst=result*2-1;
+            var editBoardSecond=remain*2+2;
+            boardgame[editBoardFirst][editBoardSecond]=0;
+            boardgame[editBoardFirst+2][editBoardSecond]=0;
+            TURN=TURN*(-1);
+        }
+    });
+});
+</script>
+
+</head>
+<body>
+    <div id="name">Jump Your Mind</div>
+    <div id="play">
+        <div class="help">HELP
+            <div class="info">
+                <li>1. 반대편 행에 도착시 승리</li>
+                <li>2. 턴에 벽설치 or 한칸이동 가능</li>
+                <li>3. 벽으로 상대를 가둘수는 없음</li>
+            </div>
+        </div>
+        <table id="board">
+            <tr><!--1행-->
+                <td data-name="0"><div></div></td>
+                <td data-name="0-1" class="vertWall"></td>  
+                <td data-name="1"><div></div></td> 
+                <td data-name="1-2" class="vertWall"></td>
+                <td data-name="2"><div></div></td> 
+                <td data-name="2-3" class="vertWall"></td>
+                <td data-name="3"><div></div></td> 
+                <td data-name="3-4" class="vertWall"></td>
+                <td data-name="4"><div class="player1piece"></div></td>
+                <td data-name="4-5" class="vertWall"></td> 
+                <td data-name="5"><div></div></td>
+                <td data-name="5-6" class="vertWall"></td>  
+                <td data-name="6"><div></div></td> 
+                <td data-name="6-7" class="vertWall"></td>
+                <td data-name="7"><div></div></td> 
+                <td data-name="7-8" class="vertWall"></td>
+                <td data-name="8"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="0-9" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="1-10" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="2-11" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="3-12" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="4-13" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="5-14" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="6-15" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="7-16" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="8-17" class="horizWall_NOHOVER"></td> 
+            </tr>
+
+
+            <tr><!--2행-->
+                <td data-name="9"><div></div></td>
+                <td data-name="9-10" class="vertWall"></td>  
+                <td data-name="10"><div></div></td> 
+                <td data-name="10-11" class="vertWall"></td>
+                <td data-name="11"><div></div></td> 
+                <td data-name="11-12" class="vertWall"></td>
+                <td data-name="12"><div></div></td> 
+                <td data-name="12-13" class="vertWall"></td>
+                <td data-name="13"><div></div></td>
+                <td data-name="13-14" class="vertWall"></td> 
+                <td data-name="14"><div></div></td>
+                <td data-name="14-15" class="vertWall"></td>  
+                <td data-name="15"><div></div></td> 
+                <td data-name="15-16" class="vertWall"></td>
+                <td data-name="16"><div></div></td> 
+                <td data-name="16-17" class="vertWall"></td>
+                <td data-name="17"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="9-18" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="10-19" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="11-20" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="12-21" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="13-22" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="14-23" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="15-24" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="16-25" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="17-26" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!--3행-->
+                <td data-name="18"><div></div></td>
+                <td data-name="18-19" class="vertWall"></td>  
+                <td data-name="19"><div></div></td> 
+                <td data-name="19-20" class="vertWall"></td>
+                <td data-name="20"><div></div></td> 
+                <td data-name="20-21" class="vertWall"></td>
+                <td data-name="21"><div></div></td> 
+                <td data-name="21-22" class="vertWall"></td>
+                <td data-name="22"><div></div></td>
+                <td data-name="22-23" class="vertWall"></td> 
+                <td data-name="23"><div></div></td>
+                <td data-name="23-24" class="vertWall"></td>  
+                <td data-name="24"><div></div></td> 
+                <td data-name="24-25" class="vertWall"></td>
+                <td data-name="25"><div></div></td> 
+                <td data-name="25-26" class="vertWall"></td>
+                <td data-name="26"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="18-27" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="19-28" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="20-29" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="21-30" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="22-31" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="23-32" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="24-33" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="25-34" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="26-35" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!--4행-->
+                <td data-name="27"><div></div></td>
+                <td data-name="27-28" class="vertWall"></td>  
+                <td data-name="28"><div></div></td> 
+                <td data-name="28-29" class="vertWall"></td>
+                <td data-name="29"><div></div></td> 
+                <td data-name="29-30" class="vertWall"></td>
+                <td data-name="30"><div></div></td> 
+                <td data-name="30-31" class="vertWall"></td>
+                <td data-name="31"><div></div></td>
+                <td data-name="31-32" class="vertWall"></td> 
+                <td data-name="32"><div></div></td>
+                <td data-name="32-33" class="vertWall"></td>  
+                <td data-name="33"><div></div></td> 
+                <td data-name="33-34" class="vertWall"></td>
+                <td data-name="34"><div></div></td> 
+                <td data-name="34-35" class="vertWall"></td>
+                <td data-name="35"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="27-36" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="28-37" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="29-38" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="30-39" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="31-40" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="32-41" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="33-42" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="34-43" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="35-44" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!--5행-->
+                <td data-name="36"><div></div></td>
+                <td data-name="36-37" class="vertWall"></td>  
+                <td data-name="37"><div></div></td> 
+                <td data-name="37-38" class="vertWall"></td>
+                <td data-name="38"><div></div></td> 
+                <td data-name="38-39" class="vertWall"></td>
+                <td data-name="39"><div></div></td> 
+                <td data-name="39-40" class="vertWall"></td>
+                <td data-name="40"><div></div></td>
+                <td data-name="40-41" class="vertWall"></td> 
+                <td data-name="41"><div></div></td>
+                <td data-name="41-42" class="vertWall"></td>  
+                <td data-name="42"><div></div></td> 
+                <td data-name="42-43" class="vertWall"></td>
+                <td data-name="43"><div></div></td> 
+                <td data-name="43-44" class="vertWall"></td>
+                <td data-name="44"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="36-45" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="37-46" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="38-47" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="39-48" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="40-49" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="41-50" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="42-51" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="43-52" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="44-53" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!--6행-->
+                <td data-name="45"><div></div></td>
+                <td data-name="45-46" class="vertWall"></td>  
+                <td data-name="46"><div></div></td> 
+                <td data-name="46-47" class="vertWall"></td>
+                <td data-name="47"><div></div></td> 
+                <td data-name="47-48" class="vertWall"></td>
+                <td data-name="48"><div></div></td> 
+                <td data-name="48-49" class="vertWall"></td>
+                <td data-name="49"><div></div></td>
+                <td data-name="49-50" class="vertWall"></td> 
+                <td data-name="50"><div></div></td>
+                <td data-name="50-51" class="vertWall"></td>  
+                <td data-name="51"><div></div></td> 
+                <td data-name="51-52" class="vertWall"></td>
+                <td data-name="52"><div></div></td> 
+                <td data-name="52-53" class="vertWall"></td>
+                <td data-name="53"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="45-54" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="46-55" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="47-56" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="48-57" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="49-58" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="50-59" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="51-60" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="52-61" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="53-62" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!-- 7행 -->
+                <td data-name="54"><div></div></td>
+                <td data-name="54-55" class="vertWall"></td>  
+                <td data-name="55"><div></div></td> 
+                <td data-name="55-56" class="vertWall"></td>
+                <td data-name="56"><div></div></td> 
+                <td data-name="56-57" class="vertWall"></td>
+                <td data-name="57"><div></div></td> 
+                <td data-name="57-58" class="vertWall"></td>
+                <td data-name="58"><div></div></td>
+                <td data-name="58-59" class="vertWall"></td> 
+                <td data-name="59"><div></div></td>
+                <td data-name="59-60" class="vertWall"></td>  
+                <td data-name="60"><div></div></td> 
+                <td data-name="60-61" class="vertWall"></td>
+                <td data-name="61"><div></div></td> 
+                <td data-name="61-62" class="vertWall"></td>
+                <td data-name="62"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="54-63" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="55-64" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="56-65" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="57-66" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="58-67" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="59-68" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="60-69" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="61-70" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="62-71" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!-- 8행 -->
+                <td data-name="63"><div></div></td>
+                <td data-name="63-64" class="vertWall"></td>  
+                <td data-name="64"><div></div></td> 
+                <td data-name="64-65" class="vertWall"></td>
+                <td data-name="65"><div></div></td> 
+                <td data-name="65-66" class="vertWall"></td>
+                <td data-name="66"><div></div></td> 
+                <td data-name="66-67" class="vertWall"></td>
+                <td data-name="67"><div></div></td>
+                <td data-name="67-68" class="vertWall"></td> 
+                <td data-name="68"><div></div></td>
+                <td data-name="68-69" class="vertWall"></td>  
+                <td data-name="69"><div></div></td> 
+                <td data-name="69-70" class="vertWall"></td>
+                <td data-name="70"><div></div></td> 
+                <td data-name="70-71" class="vertWall"></td>
+                <td data-name="71"><div></div></td> 
+            </tr>
+            <tr>
+                <td data-name="63-72" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="64-73" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="65-74" class="horizWall"></td>  
+                <td class="space"></td>  
+                <td data-name="66-75" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="67-76" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="68-77" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="69-78" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="70-79" class="horizWall"></td> 
+                <td class="space"></td>  
+                <td data-name="71-80" class="horizWall_NOHOVER"></td> 
+            </tr>
+            
+            <tr><!--9행 -->
+                <td data-name="72"><div></div></td>
+                <td data-name="72-73" class="vertWall_NOHOVER"></td>  
+                <td data-name="73"><div></div></td> 
+                <td data-name="73-74" class="vertWall_NOHOVER"></td>
+                <td data-name="74"><div></div></td> 
+                <td data-name="74-75" class="vertWall_NOHOVER"></td>
+                <td data-name="75"><div></div></td> 
+                <td data-name="75-76" class="vertWall_NOHOVER"></td>
+                <td data-name="76"><div class="player2piece"></div></td>
+                <td data-name="76-77" class="vertWall_NOHOVER"></td> 
+                <td data-name="77"><div></div></td>
+                <td data-name="77-78" class="vertWall_NOHOVER"></td>  
+                <td data-name="78"><div></div></td> 
+                <td data-name="78-79" class="vertWall_NOHOVER"></td>
+                <td data-name="79"><div></div></td> 
+                <td data-name="79-80" class="vertWall_NOHOVER"></td>
+                <td data-name="80"><div></div></td> 
+            </tr>
+        </table>
+    </div>
+    
+</body>
+</html>
